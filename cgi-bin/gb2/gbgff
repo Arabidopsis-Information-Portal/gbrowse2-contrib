@@ -1,6 +1,6 @@
-#!/local/packages/perl-5.16.1/bin/perl -w
+#!/usr/local/bin/perl -w
 
-eval 'exec /local/packages/perl-5.16.1/bin/perl -w -S $0 ${1+"$@"}'
+eval 'exec /usr/local/bin/perl -w -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
@@ -17,6 +17,7 @@ eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
 
 use strict;
 use warnings;
+use lib "/opt/www/araport/lib";
 use File::Basename 'dirname';
 use CGI 'url','path_info','redirect','header','param';
 use Bio::Graphics::Browser2::Render;
@@ -59,7 +60,7 @@ sub process_transaction {
     my $type      = param('t')   || param('type');
     my $id        = param('id');
     my $stylesheet= param('s');
-    
+
     my $url       = dirname($base);
     $url         .= '/gbrowse';
     $url         .= "/".($source || $path_info);

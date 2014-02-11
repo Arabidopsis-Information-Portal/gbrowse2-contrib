@@ -1,6 +1,6 @@
-#!/local/packages/perl-5.16.1/bin/perl -w
+#!/usr/local/bin/perl -w
 
-eval 'exec /local/packages/perl-5.16.1/bin/perl -w -S $0 ${1+"$@"}'
+eval 'exec /usr/local/bin/perl -w -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
@@ -16,6 +16,7 @@ eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 use strict;
+use lib "/opt/www/araport/lib";
 use Bio::Graphics::Browser2::UserDB;
 use Bio::Graphics::Browser2::Render;
 
@@ -64,17 +65,17 @@ sub run {
     my $fullname = param('fullname');
     my $sessionid   = param('session');
     my $remember = param('remember');
-    
+
     my $old      = param('old_val');
     my $new      = param('new_val');
     my $column   = param('column');
-    
+
     my $confirm  = param('confirm');
     my $openid   = param('openid');
     my $option   = param('option');
     my $source   = param('source');
 
-    
+
     my $userdb = Bio::Graphics::Browser2::UserDB->new(Bio::Graphics::Browser2->open_globals);
 
     if($actions{list_openid}) {
@@ -86,7 +87,7 @@ sub run {
     if($actions{confirm_openid}) {
 	my $arg;
 	my $print = -1;
-	
+
 	foreach(param('callback')) {
 	    $arg   = $_           if($print == -1);
 	    $callback{$arg} = $_  if($print ==  1);
@@ -108,7 +109,7 @@ sub run {
     $userdb->do_edit_details		($user, $column, $old, $new)			if $actions{edit_details};
     $userdb->do_email_info		($email)					if $actions{email_info};
     $userdb->do_delete_user		($user, $pass)					if $actions{delete_user};
-    
+
     $userdb->do_add_openid_user		($user, $email,$fullname,$openid, $sessionid, $remember)
 	                                                                                if $actions{add_openid_user};
     $userdb->do_check_openid		($openid, $sessionid, $source, $option)  	if $actions{check_openid};

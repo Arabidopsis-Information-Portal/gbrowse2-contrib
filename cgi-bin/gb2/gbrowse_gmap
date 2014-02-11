@@ -1,6 +1,6 @@
-#!/local/packages/perl-5.16.1/bin/perl -w
+#!/usr/local/bin/perl -w
 
-eval 'exec /local/packages/perl-5.16.1/bin/perl -w -S $0 ${1+"$@"}'
+eval 'exec /usr/local/bin/perl -w -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
@@ -64,7 +64,7 @@ PhyloGeoViz is available through Google.  Simply download using Subversion
 
 =item * Make a directory in your web server's document tree
 
-Examples: 
+Examples:
 
   mkdir /var/www/html/phylogeoviz
     or
@@ -84,7 +84,7 @@ In the top directory of your new PhyloGeoViz installation is a file called
 config.php.  This is a php file where information is set to customize
 PhyloGeoViz.
 
-Open it with your favorite editor. 
+Open it with your favorite editor.
 
 Example:
 
@@ -122,7 +122,7 @@ To check that the installation worked, go to your web site:
 
 http://localhost/phylo/
 
-This will give you a page that says "Input Your Data".  
+This will give you a page that says "Input Your Data".
 
 Click the "Autofill some example data" link to get some example data and click
 "Draw Map!".
@@ -203,6 +203,7 @@ need it again.
 =cut
 
 use strict;
+use lib "/opt/www/araport/lib";
 use Bio::Graphics::Browser2;
 use Bio::Graphics::Browser2::RegionSearch;
 use Template;
@@ -299,10 +300,10 @@ sub distance_in_km {
 
     # I don't know what a or c stand for so I'm leaving them as $a and $c
     my $a
-        = sin( $lat_dist / 2 ) 
+        = sin( $lat_dist / 2 )
         * sin( $lat_dist / 2 )
-        + cos( deg2rad($lat1) ) 
-        * cos( deg2rad($lat2) ) 
+        + cos( deg2rad($lat1) )
+        * cos( deg2rad($lat2) )
         * sin( $lng_dist / 2 )
         * sin( $lng_dist / 2 );
     my $c = 2 * atan2( sqrt($a), sqrt( 1 - $a ) );
@@ -628,7 +629,7 @@ The reason that this is not it's own script is that it is just a small portion
 of the gbrowse_gmap project.  I'm trying to minimize the file footprint of this
 project.
 
-=cut 
+=cut
 
 sub print_pop_details {
     my $self             = shift;
@@ -672,7 +673,7 @@ sub print_pop_details {
 
 __DATA__
 [% IF not balloon %]
-    <body onLoad="window.location='[% phylo_url %]?[% request_str %]';">  
+    <body onLoad="window.location='[% phylo_url %]?[% request_str %]';">
 </body>
 [% ELSE %]
     <iframe frameborder=1 scrolling=auto height=[% iframe_height %] width=[% iframe_width %] src="[% phylo_url %]?[% request_str %]">ALT</iframe>

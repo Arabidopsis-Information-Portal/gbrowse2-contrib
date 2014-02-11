@@ -1,6 +1,6 @@
-#!/local/packages/perl-5.16.1/bin/perl 
+#!/usr/local/bin/perl
 
-eval 'exec /local/packages/perl-5.16.1/bin/perl  -S $0 ${1+"$@"}'
+eval 'exec /usr/local/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
@@ -19,7 +19,7 @@ use strict;
 use warnings;
 
 # $Id$
-
+use lib "/opt/www/araport/lib";
 use Bio::Graphics::Browser2;
 
 my $fcgi = Bio::Graphics::Browser2::Render->fcgi_request;
@@ -47,7 +47,7 @@ if ($fcgi) {
 
 else {
     my $globals = Bio::Graphics::Browser2->open_globals;
-    GBrowse2::Das->new($globals)->run();    
+    GBrowse2::Das->new($globals)->run();
 }
 
 exit 0;
@@ -69,9 +69,9 @@ use Date::Format;
 use CGI qw/header path_info param url request_method escapeHTML/ ;
 
 use constant DAS_VERSION => 'DAS/1.50';
-use constant SO          => 
+use constant SO          =>
     'http://song.cvs.sourceforge.net/viewvc/*checkout*/song/ontology/so.obo';
-use constant CAPABILITIES => 
+use constant CAPABILITIES =>
     join '; ',qw(error-segment/1.0 unknown-segment/1.0 unknown-feature/1.0
 					  feature-by-id/1.0 group-by-id/1.0 sources/1.0
                                           dna/1.0 features/1.0 stylesheet/1.1 types/1.0
@@ -80,7 +80,7 @@ use constant CAPABILITIES =>
 use constant INVALID_SOURCE
     =>'invalid data source; use the sources or dsn command to get list';
 
-use constant INVALID_OP    
+use constant INVALID_OP
     =>'invalid request; please append a command such as /types to this URL';
 
 use constant ERRCODES => {
@@ -120,7 +120,7 @@ sub set_datasource {
 	$dsn   = $1;
 	$track = $2;
     }
-    
+
     my $source = $self->globals->create_data_source($dsn);
 
     if (!$source) {
@@ -159,7 +159,7 @@ sub dispatch {
 
     # all other arguments expect a valid data source
     $self->set_datasource($dsn);
-    
+
     do { $self->list_sources(); return } if $op eq $dsn;
     do { $self->stylesheet();   return } if $op eq 'stylesheet';
     do { $self->entry_points(); return } if $op eq 'entry_points';
@@ -201,9 +201,9 @@ sub ok_header {
 
 sub list_dsns {
     my $self    = shift;
-    
+
     my $globals = $self->globals;
-    
+
     my $j = ' 'x3;
     $self->ok_header();
 
@@ -278,9 +278,9 @@ END
     my $self_url = url(-full=>1);
     $self_url    =~ s/sources.*$//;
 
-    my @sources  = $self->datasource ? $self->datasource 
+    my @sources  = $self->datasource ? $self->datasource
                                      : sort $globals->data_sources;
-    
+
 
     print "<SOURCES>\n";
 
@@ -288,7 +288,7 @@ END
     for my $dsn (sort $globals->data_sources) {
 	my $source = $globals->create_data_source($dsn);
 
-	my $sourceinfo = ($source->setting('das source') || 
+	my $sourceinfo = ($source->setting('das source') ||
 			  $source->setting('metadata'))
 	    or  next;
 
@@ -299,7 +299,7 @@ END
 	    warn "'das source' option requires mandatory '$_' field; skipping\n";
 	    next SOURCE;
 	}
-	
+
 	my $created;
 	{
 	    local $^W = 0;  # to quench uninit warnings from Date::Parser
@@ -308,7 +308,7 @@ END
 	    $created = strftime("%Y-%m-%dT%T%z",@time) || '';
 	}
 	my $version = $a{version} || $a{coordinates_version} || '';
-	
+
 	my @tracks = $self->track ? $self->track : sort $source->labels;
 	for my $track (@tracks) {
 	    next unless $source->setting($track=>'das category');
@@ -325,9 +325,9 @@ END
 	    my $base        = url();
 	    $base           =~ s/\?$//;
 	    my $maintainer  = CGI::escapeHTML($a{maintainer});
-	    
+
 	    my $uri = CGI::escape($dsn).'|'.CGI::escape($track);
-	    
+
 	    print <<END;
      <SOURCE uri="$uri" title="$key" description="$description">
         <MAINTAINER email="$maintainer" />
@@ -407,21 +407,21 @@ END
 	$stylesheet .= qq(  <CATEGORY id="$cat">\n);
 
 	my (%seenit,%doneit);
-	
-	my @types = grep {!$seenit{$_}++} exists $category2type->{$cat} 
-	             ? @{$category2type->{$cat}} 
+
+	my @types = grep {!$seenit{$_}++} exists $category2type->{$cat}
+	             ? @{$category2type->{$cat}}
 	             : 'default|default';
 
 	for my $toplevel (@types) {
 
 	    my $db         = $source->open_database($track);
 	    my $subtypemap = $self->expand_types($db,$toplevel);
-	
+
 	    for my $type ('default',keys %$subtypemap) {
 
 		my $forced_type = $source->setting($track=>'das type');
-		my $typeid = $type eq 'default' 
-		                ? 'default' 
+		my $typeid = $type eq 'default'
+		                ? 'default'
 			        : ($forced_type || $self->guess_type($type));
 		next if $doneit{$typeid}++;
 
@@ -480,7 +480,7 @@ END
 
 	$stylesheet .= qq(  </CATEGORY>\n);
     }
-  
+
     $stylesheet .= <<END;
 </STYLESHEET>
 </DASSTYLE>
@@ -536,7 +536,7 @@ sub categories {
     my $has_superparts = $source->setting($track=>'das superparts');
     my $structural     = $source->setting($track=>'das landmark') ||
 	$has_subparts || $has_superparts;
-	
+
     $category ||= 'structural' if $structural;
     next unless $category;  # skip sections without a category marked
 
@@ -629,9 +629,9 @@ sub so_hash {
     eval 'use Fcntl'   unless Fcntl->can('O_CREAT');
 
     $self->hash_sofile($so_file,$so_hash)
-	or return unless -e $so_hash && 
+	or return unless -e $so_hash &&
 	(stat($so_hash))[9] >= (stat($so_file))[9];
-    tie %SO_HASH,'DB_File',$so_hash,Fcntl->O_RDONLY,0666,$DB_File::DB_HASH or return;    
+    tie %SO_HASH,'DB_File',$so_hash,Fcntl->O_RDONLY,0666,$DB_File::DB_HASH or return;
     return \%SO_HASH;
 }
 
@@ -782,7 +782,7 @@ END
 sub type2so {
     my $self    = shift;
     my $type    = shift;
-    
+
     my $track   = $self->track;
     my $source  = $self->datasource;
 
@@ -817,7 +817,7 @@ END
 	my $source   = $typeobj->source;
 	my $id = $t;
 
-	
+
 	$id          = $self->type2so($id);
 	print qq(\t<TYPE id="$id" category="$category" method="$method" source="$source" />\n);
     }
@@ -833,10 +833,10 @@ END
 sub error_segment {
     my $self = shift;
     my ($reference,$start,$stop) = @_;
-    
+
     my $source        = $self->datasource;
     my $mapmaster     = $source->setting('das mapmaster');
-    my $authoritative = $mapmaster && 
+    my $authoritative = $mapmaster &&
 	($mapmaster eq 'SELF' || $mapmaster eq (url(-full=>1) . "/". $source->name));
     my $tag = $authoritative ? 'ERRORSEGMENT' : 'UNKNOWNSEGMENT';
     my $attributes = '';
@@ -876,11 +876,11 @@ sub features {
     }
 
     push @filter,map {exists $category2type->{$_}
-		      ? @{$category2type->{$_}} 
-		      : $_ 
+		      ? @{$category2type->{$_}}
+		      : $_
                      } @category;
 
-    @filter = map  {shellwords($source->setting($track => 'feature'))} 
+    @filter = map  {shellwords($source->setting($track => 'feature'))}
     @filter = grep {$valid_types{$_}} @filter;
 
     $self->ok_header();
@@ -970,7 +970,7 @@ sub print_feature {
     my $group         = shift || $parent || $f;
     my $level         = shift || 0;
     my $sequence      = shift || 0;
-    
+
     my @subparts     = $self->children($f);
 
     my $no_parent    = @subparts && $self->no_parent_wanted($f);
@@ -1042,8 +1042,8 @@ sub _print_feature {
 
   my $gclass;
   if ($f->can('group')) { # Bio::DB::GFF feature
-    $gclass      = (ref($group) && $group->can('class')) 
-	               ? $group->class 
+    $gclass      = (ref($group) && $group->can('class'))
+	               ? $group->class
 		       : 'anonymous';
   } else {
     $gclass      = '';
@@ -1057,13 +1057,13 @@ sub _print_feature {
   # for the purpose of serializing on the net.  What amazing shortsightedness
   # on the part of someone who should know better.
   $method = $agg_map->{$method} if defined $agg_map->{$method};
-	
+
   $phase       ||= 0;
   $orientation ||= 0;
   $score       = '-' unless defined $score;
   $orientation = $orientation >= 0 ? '+' : '-';
 
-  ($start,$end) = ($end,$start) 
+  ($start,$end) = ($end,$start)
       if defined($start) && defined($end) && $start > $end;
 
   # group stuff
@@ -1106,7 +1106,7 @@ sub _print_feature {
     my $seqid = $target->ref;
     $target_info = qq(<TARGET id="$seqid" start="$start" stop="$stop" />);
   }
-	
+
   my ($map,$type2category);
   $map = qq() ;
 
@@ -1240,7 +1240,7 @@ sub get_segments {
     my $self = shift;
 
     my $source = $self->datasource;
-    
+
     # extended segment argument
     my @segments;
     foreach (param('segment')) {
@@ -1264,7 +1264,7 @@ sub get_segments {
 	my @values = ($name,$class,$start,$stop);
 	$_ = \@values;
     }
-    
+
     return wantarray ? @segments : \@segments;
 }
 
@@ -1328,7 +1328,7 @@ sub transmute {
 
     # otherwise do a fuzzy match
     for my $typeobj (values %{$map->{__fuzzy__}}) {
-	
+
 	if ($typeobj->match($type)) {
 	    my $category  = $map->{$typeobj};   # fetch category for this object
 	    $map->{$type} = $category;          # remember exact match for later

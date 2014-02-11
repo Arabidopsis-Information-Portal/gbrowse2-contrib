@@ -1,6 +1,6 @@
-#!/local/packages/perl-5.16.1/bin/perl -w
+#!/usr/local/bin/perl -w
 
-eval 'exec /local/packages/perl-5.16.1/bin/perl -w -S $0 ${1+"$@"}'
+eval 'exec /usr/local/bin/perl -w -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
@@ -16,6 +16,7 @@ eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 use strict;
+use lib "/opt/www/araport/lib";
 use Bio::Graphics::Browser2;
 use Bio::Graphics::Browser2::RegionSearch;
 use Bio::Graphics::Browser2::Markup;
@@ -123,7 +124,7 @@ sub source {
 
 sub run {
     my $self = shift;
-    
+
     my $conf    = $self->globals;
     my $session = $conf->session;
     $conf->update_data_source($session);
@@ -274,7 +275,7 @@ sub print_features {
 				 $options,
 				 "Length",
 				 $f->length);
-	
+
 	eval {
 	    local $^W = 0;
 	    if ($f->can('hit') && (my $hit = $f->hit)) {
@@ -296,38 +297,38 @@ sub print_features {
 						 $options,
 						 '',
 						 $self->print_matches($f,$hit,$bug));# if $subf;
-		
+
 	    }
-	    
+
 	    $string .= $self->print_multiple($f,
 					     $options,
 					     "Score",
 					     $f->score) if $f->can('score') && defined $f->score;
-	    
+
 	    my %attributes = $f->attributes if $f->can('attributes');
-	    
+
 	    for my $a (sort grep {!/Hit/} keys %attributes) {
 		$string .= $self->print_multiple($f,
 						 $options,
 						 $a,
 						 $f->attributes($a));
 	    }
-	    
+
 	    $string   .= $self->print_multiple($f,
 					       $options,
 					       'primary_id',
 					       $f->primary_id) if $f->can('primary_id');
-	    
+
 	    $string   .= $self->print_multiple($f,
 					       $options,
 					       'gbrowse_dbid',
 					       $f->gbrowse_dbid) if $f->can('gbrowse_dbid') && $f->gbrowse_dbid;
-	    
+
 	    $string   .= TR({-valign=>'top',-class=>'databody'},
 			    th({-height=>3},''),
 			    td({-height=>3},'')
 		);
-	    
+
 	    # try to sort features with hits so that hit is in order.
 	    # But, subfeatures don't always have the hit, so check for
 	    # that too
@@ -337,16 +338,16 @@ sub print_features {
 	    } else {
 		@subfeatures = sort {$a->start <=> $b->start} @subfeatures;
 	    }
-	    
+
 	    my $subtable = $self->print_multiple($f,
 						 $options,
 						 'Parts',
 						 $self->print_features(\@subfeatures,$subf+1)
 		) if @subfeatures;
-	
+
 	    $string .= $subtable || '';  # prevent uninit variable warning
 	    $string .= CGI::end_table();
-	
+
 	    if ($subtable or $subf==0) {
 		if ($f->length > MAX_DNA) {
 		    $string .= "<b><i>Sequence display limited to ".MAX_DNA." bases</i></b>";
@@ -375,7 +376,7 @@ sub get_seq {
     my $strand = $f->strand;
 
     # the sequence must live in the database flagged in the [GENERAL] section
-    my $db    = $self->source->open_database() or return; 
+    my $db    = $self->source->open_database() or return;
     my ($seg) = $db->segment($ref,$start,$end) or return;
     return $seg->seq if eval {$f->target && $f->strand < 0 && $f->target->strand < 0};
     return $strand >= 0 ? $seg->seq : $seg->seq->revcom;
@@ -477,7 +478,7 @@ sub print_matches {
     for (my $i=0; $i<@top; $i++) {
 	my $src_delta = $sdir * (length($top[$i]) - $top[$i]=~tr/-/-/);
 	my $tgt_delta = $tdir * (length($bottom[$i]) - $bottom[$i]=~tr/-/-/);
-	
+
 	$string .= sprintf("%${m}s %${p}d %s %d\n$l%s\n%${m}s %${p}d %s %d\n\n",
 			   $top_label,$src_x,$top[$i],$src_x + $src_delta - $sdir,
 			   $middle[$i],
@@ -485,7 +486,7 @@ sub print_matches {
 
 	$src_x  += $src_delta;
 	$tgt_x  += $tgt_delta;
-	
+
     }
     return pre($string);
 }
@@ -524,8 +525,8 @@ sub do_align {
 		# nothing needs to be done for hard clipping or pads
 	    } else {
 		$pad_match  .= join '',(
-		    map {substr($sdna,$_,1) eq substr($tdna,$_,1) 
-			     ? '|' 
+		    map {substr($sdna,$_,1) eq substr($tdna,$_,1)
+			     ? '|'
 			     : ' '
 		    } (0..$count-1));
 		$pad_source .= substr($sdna,0,$count,'');
@@ -579,8 +580,8 @@ sub print_multiple {
 	}
 
 	# for EST alignment features, create a link to get the orignal EST sequence
-	if (($label eq 'Query') 
-	    && ($self->{urls}{'alignment'}) 
+	if (($label eq 'Query')
+	    && ($self->{urls}{'alignment'})
 	    && ($obj =~ /alignment/i)){
 	    my $name = shift @a;
 	    $LINK = $self->{urls}{'alignment'};
@@ -590,11 +591,11 @@ sub print_multiple {
 
 	# Wrap way long lines, but not those involving HTML tags or
 	# inside <PRE sections.
-	$obj = join "", 
-	map{ s/([^\s\'\"\/;&]{60})/$1 /g 
-		 unless /\</; $_ 
+	$obj = join "",
+	map{ s/([^\s\'\"\/;&]{60})/$1 /g
+		 unless /\</; $_
 	} split /(<[^>]*>)/,$obj unless $obj =~ /<pre/i;
-    
+
 	if ($isFirst) {
 	    $isFirst =0 ;
 	    $string .= join '',TR({-valign=>'top',-class=>'databody'},
@@ -605,7 +606,7 @@ sub print_multiple {
 				  td($options, $LINK ? $LINK : $obj)
 		);
 	} else {
-	    
+
 	    $string .= join '', TR({-class=>'databody'},
 				   th({-align=>'RIGHT',-class=>'datatitle',-width=>100},'&nbsp;'),
 				   td($options,$LINK?$LINK:$obj)
@@ -639,7 +640,7 @@ sub position {
 
     my $src = escape($self->source->name);
     my $url = "../gbrowse/$src?name=$ref:$start..$end";
-    return a({-href=>$url},$strand ? "$ref:$start..$end ($strand strand)" 
+    return a({-href=>$url},$strand ? "$ref:$start..$end ($strand strand)"
 	                           : "$ref:$start..$end");
 }
 
@@ -649,7 +650,7 @@ sub get_link_urls {
     my $source = $self->source;
     my $urls   = $self->{urls};
 
-    my @LINK_CONFIGS = map {$_=~/\:DETAILS$/?$_:undef} 
+    my @LINK_CONFIGS = map {$_=~/\:DETAILS$/?$_:undef}
         $source->Bio::Graphics::FeatureFile::setting();
 
     foreach (@LINK_CONFIGS){
@@ -670,7 +671,7 @@ sub format_values {
 
     $Data::Dumper::Indent = 3;
     $Data::Dumper::Terse  = 1;
-    return map {ref($_) ? "<pre>".Dumper($_)."</pre>" 
+    return map {ref($_) ? "<pre>".Dumper($_)."</pre>"
 		        : $_} @values unless $formatter;
     if (ref $formatter eq 'CODE') {
 	return map {$formatter->($_,$tag,$feature)} @values;
@@ -698,7 +699,7 @@ sub format_values {
     $formatter =~ s/\$description/$description/g;
 
     return map {my $tmp_formatter = $formatter;
-		$tmp_formatter =~ s/\$value/$_/g;      
+		$tmp_formatter =~ s/\$value/$_/g;
 		$tmp_formatter} @values;
 }
 
@@ -710,7 +711,7 @@ sub get_formatter {
     my $source  = $feature->source_tag;
     my $key     = join ':',$method,$source,$tag;
 
-    return $self->{formatterCache}{$key} 
+    return $self->{formatterCache}{$key}
       if exists $self->{formatterCache}{$key};
 
     my $config = $self->source;
@@ -762,7 +763,7 @@ sub remote_content {
     # the key for the text or code-ref in the gbrowse config file
     my ($key,$feat) = @_;
 
-    my $contents = $self->source->setting('TOOLTIPS',$key) 
+    my $contents = $self->source->setting('TOOLTIPS',$key)
 	or die "$key is empty";
     my $coderef = (ref $contents||'') eq 'CODE';
     return $contents unless $coderef;

@@ -1,6 +1,6 @@
-#!/local/packages/perl-5.16.1/bin/perl 
+#!/usr/local/bin/perl
 
-eval 'exec /local/packages/perl-5.16.1/bin/perl  -S $0 ${1+"$@"}'
+eval 'exec /usr/local/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
@@ -13,6 +13,7 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 use strict;
+use lib "/opt/www/araport/lib";
 use GD;
 use Bio::Graphics;
 use CGI qw(:standard param);
@@ -24,7 +25,7 @@ gbrowse_key_img
 =head1 SYNOPSIS
 
 A small cgi script designed for generating key images for features using heat_map glyph
-Shows the color space used to display feature scores. Hardcoded to be 120x23 image 
+Shows the color space used to display feature scores. Hardcoded to be 120x23 image
 and may be embedded in hover balloons using stanza code, i.e.
 
  balloon hover = sub { my $f = shift;
@@ -40,14 +41,14 @@ The above code will display color key with score information
   ------      -----------                   -------
 
   -start_c     Beginning of the color       white
-               gradient, expressed as a 
-               named color or RGB hex 
+               gradient, expressed as a
+               named color or RGB hex
                string
- 
+
   -end_c       End of the color gradient    red
 
   -min         Minimum score of the data    0
-  
+
   -max         Maximum score of the data    255
 
   -width       Width of the image           120
@@ -90,7 +91,7 @@ my $heater = HeatKey->new(-width      => $width,
                           -range      => $range,
                           -start_color=> $start_color,
                           -end_color  => $end_color
-                          ); 
+                          );
 
 $heater->calculate_gradient($keyfeature->{segments});
 $heater->draw_image($keyfeature->{segments});
@@ -114,8 +115,8 @@ use base 'Bio::Graphics::Glyph::heat_map';
 BEGIN {
   no strict 'refs';
 
-  my @subs = qw/ h_start s_start v_start h_range s_range v_range width height 
-                 start_color end_color min_score max_score low_rgb low_hsv high_rgb 
+  my @subs = qw/ h_start s_start v_start h_range s_range v_range width height
+                 start_color end_color min_score max_score low_rgb low_hsv high_rgb
                  score_range gd translation key_font min max/;
 
   for my $sub ( @subs ) {
@@ -181,7 +182,7 @@ sub draw_image {
  #Paint gradient
  for my $line (1..$self->width-2) {
   my $index = int($line*(scalar(@{$segments}-1)/$self->width));
-  
+
   my $score = ($keyfeature->segments)[$index]->score || 0;
   my $partcolor;
   # use start color if no score or no score gradient
